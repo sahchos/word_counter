@@ -1,11 +1,17 @@
 import signal
+import logging
+import logging.config
 
-import tornado.ioloop
 import tornado.web
-from tornado import gen
+import tornado.gen
+import tornado.ioloop
 from tornado.httpserver import HTTPServer
 
 from utils.db import Database
+
+logging.config.fileConfig('logging.conf')
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -19,6 +25,7 @@ class MainHandler(tornado.web.RequestHandler):
 
 class Application(tornado.web.Application):
     def __init__(self):
+        logger.debug('Create DB connection pool')
         # TODO: read and pass env settings
         self.db = Database(host='db', port=3306, user='admin', password='admin', database='octopus')
         # TODO: get handlers from apps
@@ -33,18 +40,25 @@ class Application(tornado.web.Application):
 
     async def _shutdown(self):
         # stop receive requests
+        logger.debug('Shutdown stop server')
         server.stop()
+
         # TODO: use env
         # in real app could be extended to request endpoint for check active requests count
-        await gen.sleep(5)
+        logger.debug('Shutdown waiting to process existing requests')
+        await tornado.gen.sleep(5)
         tornado.ioloop.IOLoop.current().stop()
+
+        logger.debug('Shutdown close pool connection')
         self.db.pool.close()
 
     def exit_handler(self, sig, frame):
+        logger.debug(f'Shutdown signal received {sig}')
         tornado.ioloop.IOLoop.current().add_callback_from_signal(self._shutdown)
 
 
 if __name__ == "__main__":
+    logger.debug('Start application')
     app = Application()
     server = HTTPServer(app)
 
