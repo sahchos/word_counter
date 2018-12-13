@@ -88,17 +88,15 @@ class DatabaseConnection(object):
 
 
 class Database(object):
-
     """
     Asynchronous MySQL database with connection pool.
     """
 
     def __init__(self, host=None, database=None, user=None, password=None, **kwargs):
-        # TODO: add support for passed or default params
         self.pool = tormysql.ConnectionPool(
-            max_connections=256,
-            wait_connection_timeout=5,
-            idle_seconds=7200,
+            max_connections=kwargs.get('max_connections', 256),
+            wait_connection_timeout=kwargs.get('wait_connection_timeout', 5),
+            idle_seconds=kwargs.get('idle_seconds', 7200),
             host=host,
             db=database,
             user=user,
@@ -112,7 +110,6 @@ class Database(object):
 
     @coroutine
     def acquire(self, auto_commit=True):
-
         """
         Acquires a new connection from pool. Acquired connection has context management, so
         it can be used with 'with' statement, and few requests will happen in a single connection.
