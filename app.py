@@ -9,19 +9,11 @@ from tornado.httpserver import HTTPServer
 from envparse import env
 
 from utils.db import Database
+from word_counter.urls import word_counter_urls
 
 logging.config.fileConfig('logging.conf')
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
-
-class MainHandler(tornado.web.RequestHandler):
-    async def get(self):
-        sql = "SELECT table_name FROM information_schema.tables;"
-        res = await app.db.query(sql)
-        print(res)
-        self.write("Hello world")
-        self.finish()
 
 
 class Application(tornado.web.Application):
@@ -31,19 +23,15 @@ class Application(tornado.web.Application):
         logger.debug('Create DB connection pool')
         self.db = Database(
             host=self.MYSQL_HOST,
-            port=self.MYSQL_HOST,
+            port=self.MYSQL_PORT,
             user=self.MYSQL_USER,
             password=self.MYSQL_PASSWORD,
             database=self.MYSQL_DATABASE
         )
-        # TODO: get handlers from apps
-        handlers = [
-            (r"/", MainHandler),
-        ]
         settings = dict(
             debug=self.DEBUG
         )
-        super().__init__(handlers=handlers, **settings)
+        super().__init__(handlers=self._get_handlers(), **settings)
 
     def _set_env_config(self):
         """
@@ -51,13 +39,19 @@ class Application(tornado.web.Application):
         """
         logger.debug('Set env config')
         self.DEBUG = env.bool('DEBUG')
-        self.APP_PORT = env.bool('APP_PORT')
+        self.APP_PORT = env.int('APP_PORT')
         self.MYSQL_HOST = env('MYSQL_HOST')
-        self.MYSQL_PORT = env('MYSQL_PORT')
+        self.MYSQL_PORT = env.int('MYSQL_PORT')
         self.MYSQL_DATABASE = env('MYSQL_DATABASE')
         self.MYSQL_USER = env('MYSQL_USER')
         self.MYSQL_PASSWORD = env('MYSQL_PASSWORD')
-        self.SHUTDOWN_WAIT_TIME = env('SHUTDOWN_WAIT_TIME')
+        self.SHUTDOWN_WAIT_TIME = env.int('SHUTDOWN_WAIT_TIME')
+
+    def _get_handlers(self):
+        handlers = []
+        handlers.extend(word_counter_urls)
+
+        return handlers
 
     async def _shutdown(self):
         """
