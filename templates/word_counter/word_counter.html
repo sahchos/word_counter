@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% from "helpers/formhelpers.html" import render_field %}
+
+{% block content %}
+    Word counter
+    <form action="." method="post" novalidate>
+        {{ render_field(form.url) }}
+        <input type="submit" value="Submit">
+    </form>
+{% endblock %}
