@@ -13,7 +13,7 @@ from utils.db import Database
 from word_counter.urls import word_counter_urls
 
 logging.config.fileConfig('logging.conf')
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG if env.bool('DEBUG') else logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -31,7 +31,7 @@ class Application(web.Application):
         )
 
         jinja2_env = jinja2.Environment(
-            loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates")),
+            loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')),
             autoescape=False
         )
         jinja2_loader = Jinja2Loader(jinja2_env)

@@ -7,4 +7,14 @@
         {{ render_field(form.url) }}
         <input type="submit" value="Submit">
     </form>
+
+    {% if error_msg %}
+        <p>{{ error_msg }}</p>
+    {% endif %}
+
+    {% if top_words %}
+        {% for word in top_words %}
+            <p>{{ word[0] }} - {{ word[1] }}</p>
+        {% endfor %}
+    {% endif %}
 {% endblock %}
