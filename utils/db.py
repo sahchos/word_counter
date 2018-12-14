@@ -47,6 +47,16 @@ class DatabaseConnection(object):
             raise Return(result)
 
     @coroutine
+    def executemany(self, query, data, *args, **kwargs):
+        """
+        Executes many insertions or updates.
+        """
+
+        with self.conn.cursor() as cursor:
+            result = yield cursor.executemany(query, data, *args, **kwargs)
+            raise Return(result)
+
+    @coroutine
     def get(self, query, *args, **kwargs):
         """
         Returns one row from a mysql query (a dict).
@@ -138,6 +148,17 @@ class Database(object):
 
         with (yield self.acquire()) as conn:
             result = yield conn.execute(query, *args, **kwargs)
+
+        raise Return(result)
+
+    @coroutine
+    def executemany(self, query, data, *args, **kwargs):
+        """
+        Executes many insertions or updates.
+        """
+
+        with (yield self.acquire()) as conn:
+            result = yield conn.executemany(query, data, *args, **kwargs)
 
         raise Return(result)
 

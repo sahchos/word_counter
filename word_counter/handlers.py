@@ -2,6 +2,8 @@ from tornado import web
 from tornado.httpclient import AsyncHTTPClient
 
 from utils.text_processor import TextProcessor
+
+from .models import Word
 from .forms import WordCounterForm
 
 
@@ -27,6 +29,7 @@ class WordCounterHandler(web.RequestHandler):
                 text_processor = TextProcessor(text=response.body)
                 text_processor.set_text_from_tags(['p', 'div'])
                 word_counter = text_processor.get_word_counter(['N', 'V'])
-                top_words = word_counter.most_common(100)
+                top_words = word_counter.most_common(3)
+                await Word.bulk_insert_update(top_words, self.application)
 
         self.render(self.template_name, form=form, top_words=top_words)

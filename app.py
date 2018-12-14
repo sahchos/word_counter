@@ -5,6 +5,7 @@ import logging.config
 
 from tornado import web, gen, ioloop
 from tornado.httpserver import HTTPServer
+from pymysql import ProgrammingError
 import jinja2
 from envparse import env
 from tornado_jinja2 import Jinja2Loader
@@ -29,6 +30,8 @@ class Application(web.Application):
             password=self.MYSQL_PASSWORD,
             database=self.MYSQL_DATABASE
         )
+
+        ioloop.IOLoop.current().add_callback(self._create_tables)
 
         jinja2_env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')),
@@ -55,12 +58,30 @@ class Application(web.Application):
         self.MYSQL_USER = env('MYSQL_USER')
         self.MYSQL_PASSWORD = env('MYSQL_PASSWORD')
         self.SHUTDOWN_WAIT_TIME = env.int('SHUTDOWN_WAIT_TIME')
+        self.PUBLIC_KEY = env('PUBLIC_KEY')
+        self.PRIVATE_KEY = env('PRIVATE_KEY')
+        self.WORD_SALT = env('WORD_SALT')
 
     def _get_handlers(self):
         handlers = []
         handlers.extend(word_counter_urls)
 
         return handlers
+
+    async def _create_tables(self):
+        try:
+            await self.db.query("SELECT COUNT(*) FROM words LIMIT 1")
+        except ProgrammingError:
+            await self.db.execute(
+                """
+                CREATE TABLE `words` (
+                    `pk` VARCHAR(255) CHARACTER SET utf8 NOT NULL,
+                    `word` VARCHAR(255) CHARACTER SET utf8 NOT NULL,
+                    `count` INT NOT NULL,
+                    PRIMARY KEY (`pk`,`word`)
+                );
+                """
+            )
 
     async def _shutdown(self):
         """

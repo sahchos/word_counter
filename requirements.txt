@@ -5,3 +5,4 @@ wtforms-tornado==0.0.2
 tornado-jinja2==0.2.4
 beautifulsoup4==4.6.3
 nltk==3.4
+pycrypto==2.6.1

@@ -26,3 +26,7 @@ htmlcov
 
 # virtual environments
 .env
+
+# encryption keys
+key_rsa
+key_rsa.pub
