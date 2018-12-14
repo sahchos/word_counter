@@ -10,7 +10,9 @@ import jinja2
 from envparse import env
 from tornado_jinja2 import Jinja2Loader
 
+from admin.urls import admin_urls
 from utils.db import Database
+from utils.encryption import Encryption
 from word_counter.urls import word_counter_urls
 
 logging.config.fileConfig('logging.conf')
@@ -39,6 +41,8 @@ class Application(web.Application):
         )
         jinja2_loader = Jinja2Loader(jinja2_env)
 
+        self.encryption = Encryption(self)
+
         settings = dict(
             debug=self.DEBUG,
             template_loader=jinja2_loader
@@ -65,6 +69,7 @@ class Application(web.Application):
     def _get_handlers(self):
         handlers = []
         handlers.extend(word_counter_urls)
+        handlers.extend(admin_urls)
 
         return handlers
 
@@ -78,7 +83,7 @@ class Application(web.Application):
                     `pk` VARCHAR(255) CHARACTER SET utf8 NOT NULL,
                     `word` VARCHAR(255) CHARACTER SET utf8 NOT NULL,
                     `count` INT NOT NULL,
-                    PRIMARY KEY (`pk`,`word`)
+                    PRIMARY KEY (`pk`)
                 );
                 """
             )

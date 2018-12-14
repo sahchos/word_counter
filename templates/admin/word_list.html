@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Admin Word Counter
+{% endblock %}
+
+{% block content %}
+
+    {% if words %}
+        {% for word in words %}
+            <p>{{ word.word }} - {{ word.count }}</p>
+        {% endfor %}
+
+        {% if current_page > 1 %}
+            <a href="?page={{ current_page - 1 }}">Previous page</a>
+        {% endif %}
+        <a href="?page={{ current_page + 1 }}">Next page</a>
+    {% else %}
+        Words not found
+    {% endif %}
+
+{% endblock %}

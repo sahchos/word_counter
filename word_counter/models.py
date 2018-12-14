@@ -1,7 +1,5 @@
 import hashlib
 
-from utils.encryption import Encryption
-
 
 class Word:
     def __init__(self, word, count):
@@ -26,9 +24,8 @@ class Word:
         """
 
         words_data = []
-        encryption = Encryption(app)
         for word in words:
             w = cls(*word)
-            words_data.append((w.get_hashed_word(app), w.get_encrypted_word(encryption), w.count))
+            words_data.append((w.get_hashed_word(app), w.get_encrypted_word(app.encryption), w.count))
 
         await app.db.executemany(sql, words_data)
