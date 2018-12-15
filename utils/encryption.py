@@ -58,4 +58,4 @@ class Encryption:
     def decrypt_message(self, msg):
         decoded_encrypted_msg = base64.b64decode(msg)
         decoded_decrypted_msg = self.secret_key.decrypt(decoded_encrypted_msg)
-        return decoded_decrypted_msg
+        return decoded_decrypted_msg.decode('utf-8')

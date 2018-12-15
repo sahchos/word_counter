@@ -5,7 +5,7 @@ from collections import defaultdict, Counter
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 
 
 class TextProcessor:
@@ -15,13 +15,21 @@ class TextProcessor:
         if self.nltk_data_path not in nltk.data.path:
             nltk.data.path.append(self.nltk_data_path)
 
-    def set_text_from_tags(self, tags):
+    def _tag_visible(self, element):
+        if element.parent.name in ['style', 'script', 'head', 'title', 'meta', '[document]']:
+            return False
+        if isinstance(element, Comment):
+            return False
+        return True
+
+    def set_text(self):
         """
-        Extract text from specified tags and set processor text.
-        :param list tags: list of tags to extract text
+        Extract text ignore some tags from specified tags and set processor text.
         """
         soup = BeautifulSoup(self.text, features='html.parser')
-        self.text = ''.join(''.join(s.findAll(text=True)) for s in soup.findAll(tags))
+        texts = soup.findAll(text=True)
+        visible_texts = filter(self._tag_visible, texts)
+        self.text = ' '.join(t.strip() for t in visible_texts)
 
     def get_word_counter(self, tags):
         """

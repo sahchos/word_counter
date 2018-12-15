@@ -5,7 +5,6 @@ import logging.config
 
 from tornado import web, gen, ioloop
 from tornado.httpserver import HTTPServer
-from pymysql import ProgrammingError
 import jinja2
 from envparse import env
 from tornado_jinja2 import Jinja2Loader
@@ -23,6 +22,10 @@ logger = logging.getLogger(__name__)
 class Application(web.Application):
     def __init__(self):
         self._set_env_config()
+        self.APP_ROOT = os.path.dirname(__file__)
+        self.TOP_WORDS_COUNT = 100
+        self.ADMIN_WORDS_PER_PAGE = 100
+        self.encryption = Encryption(self)
 
         logger.debug('Create DB connection pool')
         self.db = Database(
@@ -33,20 +36,17 @@ class Application(web.Application):
             database=self.MYSQL_DATABASE
         )
 
-        ioloop.IOLoop.current().add_callback(self._create_tables)
-
         jinja2_env = jinja2.Environment(
-            loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')),
+            loader=jinja2.FileSystemLoader(os.path.join(self.APP_ROOT, 'templates')),
             autoescape=False
         )
         jinja2_loader = Jinja2Loader(jinja2_env)
-
-        self.encryption = Encryption(self)
 
         settings = dict(
             debug=self.DEBUG,
             template_loader=jinja2_loader
         )
+
         super().__init__(handlers=self._get_handlers(), **settings)
 
     def _set_env_config(self):
@@ -61,6 +61,7 @@ class Application(web.Application):
         self.MYSQL_DATABASE = env('MYSQL_DATABASE')
         self.MYSQL_USER = env('MYSQL_USER')
         self.MYSQL_PASSWORD = env('MYSQL_PASSWORD')
+        self.MYSQL_ROOT_PASSWORD = env('MYSQL_ROOT_PASSWORD')
         self.SHUTDOWN_WAIT_TIME = env.int('SHUTDOWN_WAIT_TIME')
         self.PUBLIC_KEY = env('PUBLIC_KEY')
         self.PRIVATE_KEY = env('PRIVATE_KEY')
@@ -72,21 +73,6 @@ class Application(web.Application):
         handlers.extend(admin_urls)
 
         return handlers
-
-    async def _create_tables(self):
-        try:
-            await self.db.query("SELECT COUNT(*) FROM words LIMIT 1")
-        except ProgrammingError:
-            await self.db.execute(
-                """
-                CREATE TABLE `words` (
-                    `pk` VARCHAR(255) CHARACTER SET utf8 NOT NULL,
-                    `word` VARCHAR(255) CHARACTER SET utf8 NOT NULL,
-                    `count` INT NOT NULL,
-                    PRIMARY KEY (`pk`)
-                );
-                """
-            )
 
     async def _shutdown(self):
         """

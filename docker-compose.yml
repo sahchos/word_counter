@@ -6,6 +6,8 @@ services:
     restart: always
     env_file:
     - .env
+    volumes:
+      - ./docker/mysql_data:/docker-entrypoint-initdb.d
   web:
     build: .
     ports:

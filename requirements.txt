@@ -6,3 +6,5 @@ tornado-jinja2==0.2.4
 beautifulsoup4==4.6.3
 nltk==3.4
 pycrypto==2.6.1
+coverage==4.5.2
+tornado-httpclient-mock==0.2.3
