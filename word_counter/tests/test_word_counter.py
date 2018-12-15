@@ -54,4 +54,4 @@ class TestWordCounterMethods(TestHandlerBase):
             self.assertEqual(expected_words[i][1], w.count)
 
         for word in expected_words:
-            self.assertIn(''.join([word[0], ' - ', str(word[1])]), response.body.decode('utf-8'))
+            self.assertIn(''.join([word[0]]), response.body.decode('utf-8'))

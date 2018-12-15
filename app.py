@@ -4,6 +4,7 @@ import logging
 import logging.config
 
 from tornado import web, gen, ioloop
+from tornado.httpclient import AsyncHTTPClient
 from tornado.httpserver import HTTPServer
 import jinja2
 from envparse import env
@@ -19,6 +20,11 @@ logging.basicConfig(level=logging.DEBUG if env.bool('DEBUG') else logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+class HomeHandler(web.RequestHandler):
+    def get(self, *args, **kwargs):
+        self.render("base.html")
+
+
 class Application(web.Application):
     def __init__(self):
         self._set_env_config()
@@ -26,6 +32,7 @@ class Application(web.Application):
         self.TOP_WORDS_COUNT = 100
         self.ADMIN_WORDS_PER_PAGE = 100
         self.encryption = Encryption(self)
+        self.http_client = AsyncHTTPClient()
 
         logger.debug('Create DB connection pool')
         self.db = Database(
@@ -44,7 +51,9 @@ class Application(web.Application):
 
         settings = dict(
             debug=self.DEBUG,
-            template_loader=jinja2_loader
+            template_loader=jinja2_loader,
+            static_path=os.path.join(self.APP_ROOT, 'static'),
+            static_url_prefix='/static/'
         )
 
         super().__init__(handlers=self._get_handlers(), **settings)
@@ -68,7 +77,10 @@ class Application(web.Application):
         self.WORD_SALT = env('WORD_SALT')
 
     def _get_handlers(self):
-        handlers = []
+        handlers = [
+            (r'^/$', HomeHandler),
+            (r'/static/(.*)', web.StaticFileHandler, {'path': 'static/'}),
+        ]
         handlers.extend(word_counter_urls)
         handlers.extend(admin_urls)
 

@@ -1,20 +1,35 @@
 {% extends "base.html" %}
 {% from "helpers/formhelpers.html" import render_field %}
 
-{% block content %}
-    Word counter
-    <form action="." method="post" novalidate>
-        {{ render_field(form.url) }}
-        <input type="submit" value="Submit">
-    </form>
+{% block script %}
+    <script src="{{ static_url('js/lib/d3/d3.js') }}"></script>
+    <script src="{{ static_url('js/lib/d3/d3.layout.cloud.js') }}"></script>
+    <script src="{{ static_url('js/d3.worldcloud.js') }}"></script>
+{% endblock %}
 
+{% block content %}
     {% if error_msg %}
-        <p>{{ error_msg }}</p>
+        <br>
+        <div class="notification is-danger">
+            {{ error_msg }}
+        </div>
     {% endif %}
 
+    <form action="." method="post" novalidate>
+        {{ render_field(form.url, class="input is-rounded") }}
+        <br>
+        <input class="button is-primary" type="submit" value="Submit">
+    </form>
+
     {% if top_words %}
-        {% for word in top_words %}
-            <p>{{ word[0] }} - {{ word[1] }}</p>
-        {% endfor %}
+        <div id='wordcloud'></div>
+        <script>
+          var words = {{ top_words }};
+          d3.wordcloud()
+            .size([800, 600])
+            .selector('#wordcloud')
+            .words(words)
+            .start();
+        </script>
     {% endif %}
 {% endblock %}

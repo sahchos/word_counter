@@ -7,14 +7,16 @@
 {% block content %}
 
     {% if words %}
+        <div>
+            {% if current_page > 1 %}
+                <a class="button is-primary is-rounded" href="?page={{ current_page - 1 }}">Previous page</a>
+            {% endif %}
+            <a class="button is-primary is-rounded" href="?page={{ current_page + 1 }}">Next page</a>
+        </div>
+
         {% for word in words %}
             <p>{{ word.word }} - {{ word.count }}</p>
         {% endfor %}
-
-        {% if current_page > 1 %}
-            <a href="?page={{ current_page - 1 }}">Previous page</a>
-        {% endif %}
-        <a href="?page={{ current_page + 1 }}">Next page</a>
     {% else %}
         Words not found
     {% endif %}

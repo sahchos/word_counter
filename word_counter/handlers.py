@@ -29,5 +29,8 @@ class WordCounterHandler(web.RequestHandler):
                 word_counter = text_processor.get_word_counter(['N', 'V'])
                 top_words = word_counter.most_common(self.application.TOP_WORDS_COUNT)
                 await Word.bulk_insert_update(top_words, self.application)
+                top_words = [
+                    {'text': word, 'size': count} for word, count in top_words
+                ]
 
         self.render(self.template_name, form=form, top_words=top_words)

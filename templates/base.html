@@ -3,12 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Word counter{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    {% block script %}{% endblock %}
 </head>
 <body>
-
-<div id="content">
-  {% block content %}{% endblock %}
-</div>
-
+    <section class="section">
+        <div class="container">
+            <h1 class="title">
+                Word counter
+            </h1>
+            <hr>
+            <a href="{{ reverse_url('admin_word_list') }}" class="button is-dark">Admin</a> <a href="{{ reverse_url('word_counter') }}" class="button is-dark">Word counter</a>
+            <p class="subtitle">
+                {% block content %}{% endblock %}
+            </p>
+        </div>
+    </section>
 </body>
 </html>
