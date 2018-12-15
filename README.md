@@ -24,6 +24,21 @@ Check pylint errors
 ```python
 pylint3 --rcfile=setup.cfg ./*
 ```
+
+Run tests
+---------------------
+In web docker container run next command for
+Unittests
+```python
+python -m unittest
+```
+
+Run tests with coverage and check report
+```python
+coverage run -m unittest
+coverage report -m
+```
+
 Environment variables
 ---------------------
 Please specify and change all environment variables in .env file. Current .env is an example of config suitable for local development.
