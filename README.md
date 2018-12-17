@@ -55,5 +55,7 @@ We will generate these files on server if keys where are not generated yet.
 Run project
 -----------
 ```
-docker-compose up -d
+sudo docker-compose up -d
 ```
+
+Open http://127.0.0.1:8888/ in your browser
