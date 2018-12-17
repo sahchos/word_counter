@@ -51,3 +51,9 @@ Encryption keys
 ---------------
 To safely keep encryption keys, we will specify their names in env config file and add them to .gitignore.
 We will generate these files on server if keys where are not generated yet.
+
+Run project
+-----------
+```
+docker-compose up -d
+```
